@@ -151,6 +151,14 @@ func (c *namecheapDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) erro
 	return nil
 }
 
+func getSubDomain(domain, fqdn string) string {
+	if idx := strings.Index(fqdn, "."+domain); idx != -1 {
+		return fqdn[:idx]
+	}
+
+	return util.UnFqdn(fqdn)
+}
+
 // CleanUp should delete the relevant TXT record from the DNS provider console.
 // If multiple TXT records exist with the same record name (e.g.
 // _acme-challenge.example.com) then **only** the record with the same `key`
@@ -295,19 +303,8 @@ func (c *namecheapDNSProviderSolver) setNamecheapClient(ch *v1alpha1.ChallengeRe
 func (c *namecheapDNSProviderSolver) parseChallenge(ch *v1alpha1.ChallengeRequest) (
 	zone string, domain string, err error,
 ) {
-
-	if zone, err = util.FindZoneByFqdn(
-		ch.ResolvedFQDN, util.RecursiveNameservers,
-	); err != nil {
-		return "", "", err
-	}
-	zone = util.UnFqdn(zone)
-
-	if idx := strings.Index(ch.ResolvedFQDN, "."+ch.ResolvedZone); idx != -1 {
-		domain = ch.ResolvedFQDN[:idx]
-	} else {
-		domain = util.UnFqdn(ch.ResolvedFQDN)
-	}
+	zone = util.UnFqdn(ch.ResolvedZone)
+	domain = getSubDomain(zone, ch.ResolvedFQDN)
 
 	return zone, domain, nil
 }
