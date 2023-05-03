@@ -40,7 +40,7 @@ push:
 .PHONY: rendered-manifest.yaml
 rendered-manifest.yaml:
 	helm template \
-	    --name ${IMAGE_NAME} \
-        --set image.repository=$(IMAGE_NAME) \
+	    ${IMAGE_NAME} \
+        --set image.repository=$(REPO_NAME)/$(IMAGE_NAME) \
         --set image.tag=$(IMAGE_TAG) \
         deploy/${IMAGE_NAME} > "$(OUT)/rendered-manifest.yaml"
